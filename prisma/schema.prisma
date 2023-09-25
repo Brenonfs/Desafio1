@@ -1,0 +1,25 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")// preciso alterar isso
+}
+model Transaction{
+  id                      Int       @id @default( autoincrement())
+  value                   Int
+  description             String
+  method                  String
+  cardNumber              String
+  cardholderName          String
+  cardExpirationDate      DateTime
+  cardVerificationCode    String
+  payables                String
+  valuePayables           Int
+  paymentDate             DateTime
+
+  @@map("transactions")
+}
