@@ -1,32 +1,26 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { prisma } from '../database';
+
+export interface TransactionData {
+  value: number;
+  description: string;
+  method: string;
+  cardNumber: string;
+  cardholderName: string;
+  cardExpirationDate: string;
+  cardVerificationCode: string;
+}
 
 export class TransactionRepository {
   transactions = [];
 
-  async create(
-    value: number,
-    description: string,
-    method: string,
-    cardNumber: string,
-    cardholderName: string,
-    cardExpirationDate: string,
-    cardVerificationCode: string,
-    payables: string,
-    valuePayables: number,
-    paymentDate: Date,
-  ) {
+  async create(data: { transactionData: TransactionData; payables: string; valuePayables: number; paymentDate: Date }) {
     const transaction = await prisma.transaction.create({
       data: {
-        value,
-        description,
-        method,
-        cardNumber,
-        cardholderName,
-        cardExpirationDate,
-        cardVerificationCode,
-        payables,
-        valuePayables,
-        paymentDate,
+        ...data.transactionData,
+        payables: data.payables,
+        valuePayables: data.valuePayables,
+        paymentDate: data.paymentDate,
       },
     });
     return transaction;

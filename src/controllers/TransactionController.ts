@@ -19,17 +19,8 @@ export class TransactionController {
   async create(req: Request, res: Response) {
     try {
       const validatedtransactionSchema = transactionCreateSchema.parse(req.body);
-      console.log('temos isso aqui');
       const createTransaction = new CreateTransactionService();
-      const result = await createTransaction.execute(
-        validatedtransactionSchema.value,
-        validatedtransactionSchema.description,
-        validatedtransactionSchema.method,
-        validatedtransactionSchema.cardNumber,
-        validatedtransactionSchema.cardholderName,
-        validatedtransactionSchema.cardExpirationDate,
-        validatedtransactionSchema.cardVerificationCode,
-      );
+      const result = await createTransaction.execute(validatedtransactionSchema);
       return res.json({
         error: false,
         message: 'Sucesso: transaction done',

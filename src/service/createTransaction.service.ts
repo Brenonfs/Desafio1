@@ -1,5 +1,5 @@
 import { BadRequestError } from '../helpers/api-erros';
-import { TransactionRepository } from '../repositories/transaction.repository';
+import { TransactionRepository, TransactionData } from '../repositories/transaction.repository';
 
 class CreateTransactionService {
   private transactionRepository: TransactionRepository;
@@ -8,48 +8,35 @@ class CreateTransactionService {
     this.transactionRepository = new TransactionRepository();
   }
 
-  async execute(
-    value: number,
-    description: string,
-    method: string,
-    cardNumber: string,
-    cardholderName: string,
-    cardExpirationDate: string,
-    cardVerificationCode: string,
-  ) {
+  async execute(transactionData: TransactionData) {
     try {
-      const newCardNumber = cardNumber.split(' ').pop();
-      let payables: string;
-      let valuePayables: number;
-      let fee: number;
-      if (method === 'debit_card') {
-        fee = 0.03;
-        valuePayables = value - value * fee;
-        payables = 'paid';
-      } else if (method === 'credit_card') {
-        fee = 0.05;
-        valuePayables = value - value * fee;
-        payables = 'waiting_funds';
-      } else {
-        throw new BadRequestError(`Método de pagamento errado`);
-      }
-      const paymentDate = method === 'debit_card' ? new Date() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // D+0 ou D+30
+      const newCardNumber = transactionData.cardNumber.split(' ').pop();
 
-      const transaction = await this.transactionRepository.create(
-        value,
-        description,
-        method,
-        newCardNumber as string,
-        cardholderName,
-        cardExpirationDate,
-        cardVerificationCode,
+      const fee = transactionData.method === 'debit_card' ? 0.03 : 0.05;
+      const valuePayables = transactionData.value - transactionData.value * fee;
+      const payables = transactionData.method === 'debit_card' ? 'paid' : 'waiting_funds';
+
+      const paymentDate =
+        transactionData.method === 'debit_card' ? new Date() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // D+0 ou D+30
+
+      const transactionInfo = {
+        transactionData: {
+          value: transactionData.value,
+          description: transactionData.description,
+          method: transactionData.method,
+          cardNumber: newCardNumber as string,
+          cardholderName: transactionData.cardholderName,
+          cardExpirationDate: transactionData.cardExpirationDate,
+          cardVerificationCode: transactionData.cardVerificationCode,
+        },
         payables,
         valuePayables,
         paymentDate,
-      );
+      };
+
+      const transaction = await this.transactionRepository.create(transactionInfo);
       return transaction;
     } catch (error: any) {
-      // Aqui você pode lidar com a exceção, por exemplo, logá-la ou lançar outra exceção personalizada
       throw new BadRequestError(`Não foi possível criar a transação: ${error.message}`);
     }
   }
