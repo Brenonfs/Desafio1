@@ -9,18 +9,18 @@ export interface TransactionData {
   cardholderName: string;
   cardExpirationDate: string;
   cardVerificationCode: string;
+  payables: string;
+  valuePayables: number;
+  paymentDate: Date;
 }
 
 export class TransactionRepository {
   transactions = [];
 
-  async create(data: { transactionData: TransactionData; payables: string; valuePayables: number; paymentDate: Date }) {
+  async create(transactionData: TransactionData) {
     const transaction = await prisma.transaction.create({
       data: {
-        ...data.transactionData,
-        payables: data.payables,
-        valuePayables: data.valuePayables,
-        paymentDate: data.paymentDate,
+        ...transactionData,
       },
     });
     return transaction;
