@@ -25,6 +25,10 @@ export class TransactionRepository {
     });
     return transaction;
   }
+  async getAllTransactions() {
+    const transactions = await prisma.transaction.findMany();
+    return transactions;
+  }
 
   async listAll() {
     const transactionsExists = await prisma.transaction.findMany({

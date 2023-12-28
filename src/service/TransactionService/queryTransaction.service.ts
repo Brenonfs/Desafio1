@@ -1,4 +1,4 @@
-import { TransactionRepository } from '../repositories/transaction.repository';
+import { TransactionRepository } from '../../repositories/transaction.repository';
 
 class QueryTransactionService {
   private transactionRepository: TransactionRepository;

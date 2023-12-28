@@ -1,5 +1,4 @@
-import { BadRequestError } from '../helpers/api-erros';
-import { TransactionRepository } from '../repositories/transaction.repository';
+import { TransactionRepository } from '../../repositories/transaction.repository';
 
 class CreateTransactionService {
   private transactionRepository: TransactionRepository;
