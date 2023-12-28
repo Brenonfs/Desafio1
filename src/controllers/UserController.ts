@@ -7,18 +7,17 @@ import { UpdateUserService } from '../service/UserService/updateUser.serviceA';
 
 export class UserController {
   async create(req: Request, res: Response) {
-    console.log('to aqui');
-    const validatedUserSchema = userCreateSchema.parse(req.body);
-    if (!validatedUserSchema) {
+    const validatedUserSchema = userCreateSchema.safeParse(req.body);
+    if (!validatedUserSchema.success) {
       throw new BadRequestError(`Não foi possível criar usuário.`);
     }
-    console.log('to aqui2');
+
     const createUser = new CreateUserService();
     const result = await createUser.execute(
-      validatedUserSchema.name,
-      validatedUserSchema.email,
-      validatedUserSchema.password,
-      validatedUserSchema.avatarFileId,
+      validatedUserSchema.data.name,
+      validatedUserSchema.data.email,
+      validatedUserSchema.data.password,
+      validatedUserSchema.data.avatarFileId,
     );
     return res.json({
       error: false,
