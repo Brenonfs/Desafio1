@@ -2,7 +2,7 @@
 
 import { prisma } from '../database';
 
-export class AvatarRepository {
+export class FileRepository {
   async saveAvatar(name: string, key: string, publicUrl: string, idPerson: number) {
     const user = await prisma.files.create({
       data: { name, key, publicUrl, idPerson },

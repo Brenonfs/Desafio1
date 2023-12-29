@@ -1,27 +1,26 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestError, UnauthorizedError } from '../../helpers/api-erros';
-import { AvatarRepository } from '../../repositories/avatar.repository';
+import { FileRepository } from '../../repositories/file.repository';
 import { UserRepository } from '../../repositories/user.repository';
 
 // ...
 
 class UpdateUserService {
   private userRepository: UserRepository;
-  private avatarRepository: AvatarRepository;
+  private avatarRepository: FileRepository;
 
   constructor() {
     this.userRepository = new UserRepository();
-    this.avatarRepository = new AvatarRepository();
+    this.avatarRepository = new FileRepository();
   }
 
   async execute(
     name: string,
-    email: string,
     avatarFileId: number | null,
     userId: number
   ) {
     const userRepository = new UserRepository();
-    const avatarRepository = new AvatarRepository();
+    const avatarRepository = new FileRepository();
 
     const userExists = await userRepository.findByUser(userId);
 
@@ -43,13 +42,11 @@ class UpdateUserService {
     }
 
     userExists.name = name !== undefined ? name : userExists.name;
-    userExists.email = email !== undefined ? email : userExists.email;
     userExists.avatarFileId = avatarFileId  !== undefined ? avatarFileId : userExists.avatarFileId;
 
 
     const user = await this.userRepository.updateUser(
       userExists.name,
-      userExists.email,
       userExists.avatarFileId as number,
       userId
     );

@@ -46,6 +46,7 @@ export const userAvatarSchema = z.object({
     })
     .min(3, { message: 'O campo "publicUrl" está muito pequeno' }),
 });
+
 export const userUpdateSchema = z.object({
   name: z
     .string({
@@ -53,13 +54,6 @@ export const userUpdateSchema = z.object({
       invalid_type_error: 'O  campo "name" tem caracteres inválidos',
     })
     .min(3, { message: 'O campo "name" está muito pequeno' }),
-  email: z
-    .string({
-      required_error: 'O  campo "email" está vazio',
-      invalid_type_error: 'O  campo "email" tem caracteres inválidos',
-    })
-    .email()
-    .min(10, { message: 'O campo "email" está muito pequeno' }),
   avatarFileId: z.number({
     required_error: 'O  campo "avatarFileId" está vazio',
     invalid_type_error: 'O  campo "avatarFileId" tem caracteres inválidos',

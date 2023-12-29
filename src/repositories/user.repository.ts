@@ -30,12 +30,11 @@ export class UserRepository {
     });
     return userExists;
   }
-  async updateUser(name: string, email: string, avatarFileId: number, userId: number) {
+  async updateUser(name: string, avatarFileId: number, userId: number) {
     const user = await prisma.user.update({
       where: { id: userId },
       data: {
         name,
-        email,
         avatarFileId,
       },
     });
