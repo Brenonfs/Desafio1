@@ -10,12 +10,13 @@ class CreateUserAvatarService {
   }
 
   async execute(
-    name: string,
     key:string,
     publicUrl:string,
     idPerson:number,
+
   ) {
-    const avatar = await this.fileRepository.saveAvatar(name,key,publicUrl,idPerson);
+    const avatarName = `${idPerson}_avatar`;
+    const avatar = await this.fileRepository.saveAvatar(avatarName,key,publicUrl,idPerson);
     return avatar;
   }
 }

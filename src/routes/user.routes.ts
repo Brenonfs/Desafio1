@@ -11,7 +11,6 @@ const userController = new UserController();
 
 userRoutes.post('/', userController.create);
 userRoutes.put('/', ensureAuthenticated, userController.update);
-userRoutes.post('/avatar', ensureAuthenticated, userController.createAvatar); // Corregir aquí
-userRoutes.post('/upload', upload.single('image'), userController.uploadAvatar); // Corregir aquí
+userRoutes.post('/upload', upload.single('image'), ensureAuthenticated, userController.createAvatar);
 
 export { userRoutes };

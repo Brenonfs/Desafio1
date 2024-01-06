@@ -2,11 +2,12 @@
 import { Request, Response } from 'express';
 
 import { BadRequestError, UnauthorizedError } from '../helpers/api-erros';
-import { userAvatarSchema, userCreateSchema, userUpdateSchema } from '../schemas/user';
+import { userCreateSchema, userUpdateSchema } from '../schemas/user';
 import { CreateUserService } from '../service/UserService/createUser.service';
 import { CreateUserAvatarService } from '../service/UserService/createUserAvatar.service';
+import { ImportFileUserService } from '../service/UserService/importFileUser.service';
 import { UpdateUserService } from '../service/UserService/updateUser.serviceA';
-import { UploadAvatarUserService } from '../service/UserService/uploadAvatarUser.service';
+import { UploadFileUserService } from '../service/UserService/uploadFileUser.service';
 
 export class UserController {
   async create(req: Request, res: Response) {
@@ -53,35 +54,32 @@ export class UserController {
   }
 
   async createAvatar(req: Request, res: Response) {
-    const validatedUserSchema = userAvatarSchema.safeParse(req.body);
-    if (!validatedUserSchema.success) {
-      throw new BadRequestError(`Não foi possível criar avatar.`);
-    }
     const userId = (req as any).user?.id;
     if (userId === undefined) {
       throw new UnauthorizedError('Usuário não está autenticado.');
     }
-    const userAvatar = new CreateUserAvatarService();
-    const result = await userAvatar.execute(
-      validatedUserSchema.data.name,
-      validatedUserSchema.data.key,
-      validatedUserSchema.data.publicUrl,
-      userId as number,
-    );
-    return res.json({
-      error: false,
-      message: 'Sucesso: avatar done',
-      result,
-    });
-  }
 
-  async uploadAvatar(req: Request, res: Response) {
+    const userAvatar = new CreateUserAvatarService();
+    const uploadAvatar = new UploadFileUserService();
+
     const { file } = req;
     if (!file) {
-      throw new BadRequestError('Error: upload');
+      throw new BadRequestError('Erro: upload');
     }
-    const userAvatar = new UploadAvatarUserService();
-    const result = await userAvatar.execute(file);
+    console.log(file);
+
+    // Upload do arquivo
+    const key = await uploadAvatar.execute(file, userId);
+
+    // Obtenção da URL do arquivo
+    const importService = new ImportFileUserService();
+    const avatarUrl = await importService.execute(key);
+    if (avatarUrl === undefined) {
+      throw new Error('A URL do avatar não foi obtida corretamente.');
+    }
+    // Criação do avatar
+    const result = await userAvatar.execute(key, avatarUrl, userId as number);
+
     return res.json({
       error: false,
       message: 'Sucesso: avatar done',

@@ -4,11 +4,11 @@ import { BadRequestError } from '../helpers/api-erros';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { transactionCreateSchema } from '../schemas/transaction';
-import { ImportAvatarService } from '../service/AvatarService/importAvatar.service';
 import { CreateTransactionService } from '../service/TransactionService/createTransaction.service';
 import { ExportTransactionService } from '../service/TransactionService/exportTransaction.service';
 import { ListTransactionService } from '../service/TransactionService/listTransaction.service';
 import { QueryTransactionService } from '../service/TransactionService/queryTransaction.service';
+import { ImportFileUserService } from '../service/UserService/importFileUser.service';
 
 export class TransactionController {
   private listTransactionService: ListTransactionService;
@@ -62,8 +62,9 @@ export class TransactionController {
     });
   }
   async importTransactionToExcel(req: Request, res: Response) {
-    const importTransaction = new ImportAvatarService();
-    const result = await importTransaction.execute(res);
+    const importTransaction = new ImportFileUserService();
+    const key = 'nome';
+    const result = await importTransaction.execute(key);
 
     return res.json({
       error: false,

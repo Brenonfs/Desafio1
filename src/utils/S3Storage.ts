@@ -10,77 +10,54 @@ class S3Storage {
   private client: S3;
 
   constructor() {
+    const region = process.env.REGION;
+    if (!region) {
+      throw new Error('REGION environment variable is not defined.');
+    }
+
     this.client = new aws.S3({
-      region: 'ca-central-1',
+      region,
     });
   }
 
-  async saveFile(filename: string): Promise<void> {
+  async saveFile(filename: string, key: string): Promise<void> {
+    const BUCKET = process.env.BUCKET;
+    if (!BUCKET) {
+      throw new Error('BUCKET environment variable is not defined.');
+    }
+
     const originalPath = path.resolve(multerConfig.directory, filename);
 
     const contentType = mimeTypes.lookup(originalPath);
-
     if (!contentType) {
       throw new Error('File not found: ' + filename);
     }
 
     const fileContent = await fs.promises.readFile(originalPath);
 
-    this.client
-      .putObject({
-        Bucket: 'novament1-nfs',
-        Key: filename,
-        ACL: 'public-read',
-        Body: fileContent,
-        ContentType: contentType,
-      })
-      .promise();
+    try {
+      console.log('Uploading file to S3:', filename);
 
-    await fs.promises.unlink(originalPath);
+      await this.client
+        .putObject({
+          Bucket: BUCKET,
+          Key: key,
+          ACL: 'public-read',
+          Body: fileContent,
+          ContentType: contentType,
+        })
+        .promise();
+
+      console.log('File uploaded successfully to S3:', filename);
+
+      await fs.promises.unlink(originalPath);
+
+      console.log('Local file deleted:', filename);
+    } catch (error) {
+      console.error('Error uploading file to S3:', error);
+      throw error;
+    }
   }
 }
 
 export default S3Storage;
-
-// /* eslint-disable import/no-extraneous-dependencies */
-// import aws, { S3 } from 'aws-sdk';
-// import fs from 'fs';
-// import mime from 'mime';
-// import path from 'path';
-
-// import multerConfig from '../configs/multer';
-
-// class S3Storage {
-//   private client: S3;
-
-//   constructor() {
-//     this.client = new aws.S3({
-//       region: 'ca-central-1',
-//     });
-//   }
-
-//   async saveFile(filename: string): Promise<void> {
-//     const originalPath = path.resolve(multerConfig.directory, filename);
-//     const contentType = mime.getType(originalPath);
-
-//     if (!contentType) {
-//       throw new Error('File not found: ' + filename);
-//     }
-
-//     const fileContent = await fs.promises.readFile(originalPath);
-
-//     this.client
-//       .putObject({
-//         Bucket: 'novament1-nfs',
-//         Key: filename,
-//         ACL: 'public-read',
-//         Body: fileContent,
-//         ContentType: contentType, // Corrected property name
-//       })
-//       .promise();
-
-//     await fs.promises.unlink(originalPath);
-//   }
-// }
-
-// export default S3Storage;
