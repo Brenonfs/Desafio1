@@ -8,7 +8,7 @@ import { CreateTransactionService } from '../service/TransactionService/createTr
 import { ExportTransactionService } from '../service/TransactionService/exportTransaction.service';
 import { ListTransactionService } from '../service/TransactionService/listTransaction.service';
 import { QueryTransactionService } from '../service/TransactionService/queryTransaction.service';
-import { ImportFileUserService } from '../service/UserService/importFileUser.service';
+import { ImportFileUserService } from '../service/FileService/importFile.service';
 
 export class TransactionController {
   private listTransactionService: ListTransactionService;

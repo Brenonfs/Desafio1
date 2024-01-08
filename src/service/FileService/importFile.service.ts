@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import { ApiError, BadRequestError, NotFoundError } from '../../helpers/api-erros';
 dotenv.config();
 
-export class ImportFileUserService {
+export class ImportFileService {
   async execute(key: string) {
     // Obtém as credenciais AWS do ambiente
     const accessKeyId = process.env.ACCESSKEYID;

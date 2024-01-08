@@ -2,7 +2,7 @@
 import { UserRepository } from '../../repositories/user.repository';
 import S3Storage from '../../utils/S3Storage';
 
-class UploadFileUserService {
+export class UploadFileService {
   private userRepository: UserRepository;
 
   constructor() {
@@ -12,11 +12,11 @@ class UploadFileUserService {
   async execute(file: Express.Multer.File, userId: number) : Promise<string> {
     const s3Storage = new S3Storage();
     // await s3Storage.saveFile(file.filename);
-    const key = `avatars/user${userId}/${file.originalname}`;
+    const key = `avatars/user/${userId}/${file.originalname}`;
 
     await s3Storage.saveFile(file.filename, key)
 
     return key;
   }
 }
-export { UploadFileUserService };
+

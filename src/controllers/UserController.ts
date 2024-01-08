@@ -3,11 +3,11 @@ import { Request, Response } from 'express';
 
 import { BadRequestError, UnauthorizedError } from '../helpers/api-erros';
 import { userCreateSchema, userUpdateSchema } from '../schemas/user';
+import { ImportFileService } from '../service/FileService/importFile.service';
+import { UploadFileService } from '../service/FileService/uploadFile.service';
 import { CreateUserService } from '../service/UserService/createUser.service';
 import { CreateUserAvatarService } from '../service/UserService/createUserAvatar.service';
-import { ImportFileUserService } from '../service/UserService/importFileUser.service';
 import { UpdateUserService } from '../service/UserService/updateUser.serviceA';
-import { UploadFileUserService } from '../service/UserService/uploadFileUser.service';
 
 export class UserController {
   async create(req: Request, res: Response) {
@@ -60,7 +60,7 @@ export class UserController {
     }
 
     const userAvatar = new CreateUserAvatarService();
-    const uploadAvatar = new UploadFileUserService();
+    const uploadAvatar = new UploadFileService();
 
     const { file } = req;
     if (!file) {
@@ -72,7 +72,7 @@ export class UserController {
     const key = await uploadAvatar.execute(file, userId);
 
     // Obtenção da URL do arquivo
-    const importService = new ImportFileUserService();
+    const importService = new ImportFileService();
     const avatarUrl = await importService.execute(key);
     if (avatarUrl === undefined) {
       throw new Error('A URL do avatar não foi obtida corretamente.');
