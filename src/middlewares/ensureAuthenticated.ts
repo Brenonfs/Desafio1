@@ -18,7 +18,7 @@ const ensureAuthenticated = async (req: Request, res: Response, next: NextFuncti
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    throw new UnauthorizedError('JWT Token não informado');
+    return next();
   }
 
   const [, token] = authHeader.split(' ');

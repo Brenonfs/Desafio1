@@ -17,8 +17,6 @@ export class CreateSession {
     );
 
     return res.json({
-      error: false,
-      message: 'Sucess',
       result,
     });
   }

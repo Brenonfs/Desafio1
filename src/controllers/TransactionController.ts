@@ -4,11 +4,11 @@ import { BadRequestError } from '../helpers/api-erros';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { transactionCreateSchema } from '../schemas/transaction';
+import { ImportFileService } from '../service/FileService/importFile.service';
 import { CreateTransactionService } from '../service/TransactionService/createTransaction.service';
 import { ExportTransactionService } from '../service/TransactionService/exportTransaction.service';
 import { ListTransactionService } from '../service/TransactionService/listTransaction.service';
 import { QueryTransactionService } from '../service/TransactionService/queryTransaction.service';
-import { ImportFileUserService } from '../service/FileService/importFile.service';
 
 export class TransactionController {
   private listTransactionService: ListTransactionService;
@@ -35,8 +35,6 @@ export class TransactionController {
       validatedtransactionSchema.data.cardVerificationCode,
     );
     return res.json({
-      error: false,
-      message: 'Sucesso: transaction done',
       result,
     });
   }
@@ -46,8 +44,6 @@ export class TransactionController {
     const result = await listTransaction.execute();
 
     return res.json({
-      error: false,
-      message: 'Sucess: list transaction ',
       result,
     });
   }
@@ -56,19 +52,15 @@ export class TransactionController {
     const result = await exportTransaction.execute(res);
 
     return res.json({
-      error: false,
-      message: 'Sucess: query done',
       result,
     });
   }
   async importTransactionToExcel(req: Request, res: Response) {
-    const importTransaction = new ImportFileUserService();
+    const importTransaction = new ImportFileService();
     const key = 'nome';
     const result = await importTransaction.execute(key);
 
     return res.json({
-      error: false,
-      message: 'Sucess: query done',
       result,
     });
   }
@@ -78,8 +70,6 @@ export class TransactionController {
     const result = await queryTransaction.execute();
 
     return res.json({
-      error: false,
-      message: 'Sucess: query done',
       result,
     });
   }

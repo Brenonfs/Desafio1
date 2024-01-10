@@ -18,6 +18,18 @@ export class UserRepository {
     });
     return user;
   }
+  async findByUserFeed(userId: number) {
+    const user = await prisma.user.findUnique({
+      where: { id: Number(userId) },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatarFileId: true,
+      },
+    });
+    return user;
+  }
   async findByEmail(email: string) {
     const userExists = await prisma.user.findFirst({
       where: { email },
@@ -39,6 +51,20 @@ export class UserRepository {
       },
     });
     return user;
+  }
+  async listAll(startIndex: number, pageSize: number) {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatarFileId: true,
+      },
+      skip: startIndex, // Pular registros até o índice de início
+      take: pageSize, // Retornar apenas a quantidade especificada de registros
+    });
+
+    return users;
   }
 }
 

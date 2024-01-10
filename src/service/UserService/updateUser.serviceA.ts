@@ -30,7 +30,7 @@ class UpdateUserService {
 
     let avatarExists;
     if (avatarFileId !== null) {
-      avatarExists = await avatarRepository.findByAvatarId(avatarFileId);
+      avatarExists = await avatarRepository.findAvatarById(avatarFileId);
     }
 
     if (!avatarExists) {

@@ -9,10 +9,19 @@ export class FileRepository {
     });
     return user;
   }
-  async findByAvatarId(avatarFileId: number) {
+  async findAvatarById(avatarFileId: number) {
     const avatarExist = await prisma.files.findUnique({
       where: { id: Number(avatarFileId) },
     });
     return avatarExist;
+  }
+  async findAvatarUrlById(avatarFileId: number) {
+    const avatar = await prisma.files.findUnique({
+      where: { id: Number(avatarFileId) },
+      select: {
+        publicUrl: true,
+      },
+    });
+    return avatar;
   }
 }

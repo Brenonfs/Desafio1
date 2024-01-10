@@ -7,6 +7,8 @@ import { ImportFileService } from '../service/FileService/importFile.service';
 import { UploadFileService } from '../service/FileService/uploadFile.service';
 import { CreateUserService } from '../service/UserService/createUser.service';
 import { CreateUserAvatarService } from '../service/UserService/createUserAvatar.service';
+import { FeedUserService } from '../service/UserService/feedUser.service';
+import { ListUserService } from '../service/UserService/listUser.service';
 import { UpdateUserService } from '../service/UserService/updateUser.serviceA';
 
 export class UserController {
@@ -24,8 +26,6 @@ export class UserController {
       validatedUserSchema.data.avatarFileId,
     );
     return res.json({
-      error: false,
-      message: 'Sucesso: user done',
       result,
     });
   }
@@ -47,8 +47,6 @@ export class UserController {
     );
 
     return res.json({
-      error: false,
-      message: 'Sucess: user updated',
       result,
     });
   }
@@ -66,23 +64,41 @@ export class UserController {
     if (!file) {
       throw new BadRequestError('Erro: upload');
     }
-    console.log(file);
-
-    // Upload do arquivo
     const key = await uploadAvatar.execute(file, userId);
 
-    // Obtenção da URL do arquivo
     const importService = new ImportFileService();
     const avatarUrl = await importService.execute(key);
     if (avatarUrl === undefined) {
       throw new Error('A URL do avatar não foi obtida corretamente.');
     }
-    // Criação do avatar
+
     const result = await userAvatar.execute(key, avatarUrl, userId as number);
 
     return res.json({
-      error: false,
-      message: 'Sucesso: avatar done',
+      result,
+    });
+  }
+  async getFeed(req: Request, res: Response) {
+    const userId = (req as any).user?.id;
+    if (userId === undefined) {
+      throw new UnauthorizedError('Usuário não está autenticado.');
+    }
+
+    const feedUserService = new FeedUserService();
+    const user = await feedUserService.execute(userId);
+
+    return res.json({
+      result: user,
+    });
+  }
+  async listUsers(req: Request, res: Response) {
+    const listUser = new ListUserService();
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+
+    const result = await listUser.execute(page, pageSize);
+
+    return res.json({
       result,
     });
   }
