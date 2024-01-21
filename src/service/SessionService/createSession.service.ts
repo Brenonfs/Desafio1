@@ -30,7 +30,9 @@ class CreateSessionService {
         expiresIn,
       });
       return {
-        user: userExist,
+        id: userExist.id,
+        name: userExist.name,
+        email: userExist.email,
         token,
       };
     }

@@ -36,7 +36,9 @@ export class UserController {
     if (!validatedUserSchema.success) {
       throw new BadRequestError(`Não foi possível atualizar usuário.`);
     }
+
     const userId = (req as any).user?.id;
+
     if (userId === undefined) {
       throw new UnauthorizedError('Usuário não está autenticado.');
     }
@@ -59,6 +61,7 @@ export class UserController {
 
     const userAvatar = new CreateUserAvatarService();
     const uploadAvatar = new UploadFileService();
+    const importFileService = new ImportFileService();
 
     const { file } = req;
     if (!file) {
@@ -66,8 +69,7 @@ export class UserController {
     }
     const key = await uploadAvatar.execute(file, userId);
 
-    const importService = new ImportFileService();
-    const avatarUrl = await importService.execute(key);
+    const avatarUrl = await importFileService.execute(key);
     if (avatarUrl === undefined) {
       throw new Error('A URL do avatar não foi obtida corretamente.');
     }
@@ -78,6 +80,7 @@ export class UserController {
       result,
     });
   }
+
   async getFeed(req: Request, res: Response) {
     const userId = (req as any).user?.id;
     if (userId === undefined) {

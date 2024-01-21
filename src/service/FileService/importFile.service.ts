@@ -1,29 +1,28 @@
+// Importando o esquema Zod
+
 import AWS from 'aws-sdk';
 import dotenv from 'dotenv';
 
 import { ApiError, BadRequestError, NotFoundError } from '../../helpers/api-erros';
+import { AwsCredentialsSchema } from '../../schemas/awsCredential';
 dotenv.config();
 
 export class ImportFileService {
   async execute(key: string) {
-    // Obtém as credenciais AWS do ambiente
-    const accessKeyId = process.env.ACCESSKEYID;
-    const secretAccessKey = process.env.SECRETACCESSKEY;
-    const region = process.env.REGION;
+    // Validando as credenciais AWS do ambiente usando o esquema Zod
+    const awsCredentialsResult = AwsCredentialsSchema.safeParse(process.env);
 
-    // Verifica se as credenciais AWS estão presentes
-    if (!accessKeyId || !secretAccessKey || !region) {
-      throw new BadRequestError(
-        'Credenciais AWS ausentes. Certifique-se de que ACCESSKEYID, SECRETACCESSKEY e REGION estão configurados.',
-      );
+    if (awsCredentialsResult.success) {
+      const { ACCESSKEYID, SECRETACCESSKEY, REGION } = awsCredentialsResult.data;
+
+      AWS.config.update({
+        accessKeyId: ACCESSKEYID,
+        secretAccessKey: SECRETACCESSKEY,
+        region: REGION,
+      });
+    } else {
+      throw new BadRequestError(awsCredentialsResult.error.errors.join('; '));
     }
-
-    // Configura as credenciais AWS
-    AWS.config.update({
-      accessKeyId,
-      secretAccessKey,
-      region,
-    });
 
     const sourceBucket = 'novament1-nfs';
     const sourceKey = key;

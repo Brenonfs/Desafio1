@@ -50,7 +50,12 @@ class UpdateUserService {
       userExists.avatarFileId as number,
       userId
     );
-    return user;
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatarFileId:user.avatarFileId,
+    };
   }
 }
 

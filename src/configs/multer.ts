@@ -7,7 +7,6 @@ export default {
     destination: tmpFolder,
     filename(request, file, callback) {
       const filename = `${file.originalname}`;
-
       return callback(null, filename);
     },
   }),

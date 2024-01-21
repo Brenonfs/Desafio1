@@ -15,7 +15,12 @@ class CreateUserService {
       throw new UnauthorizedError(`Este email ja está em uso.`);
     }
     const user = await this.userRepository.saveUser(name, email, password, avatarFileId);
-    return user;
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatarFileId:user.avatarFileId,
+    };
   }
 }
 export { CreateUserService };

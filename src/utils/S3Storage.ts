@@ -36,8 +36,6 @@ class S3Storage {
     const fileContent = await fs.promises.readFile(originalPath);
 
     try {
-      console.log('Uploading file to S3:', filename);
-
       await this.client
         .putObject({
           Bucket: BUCKET,
@@ -48,11 +46,7 @@ class S3Storage {
         })
         .promise();
 
-      console.log('File uploaded successfully to S3:', filename);
-
       await fs.promises.unlink(originalPath);
-
-      console.log('Local file deleted:', filename);
     } catch (error) {
       console.error('Error uploading file to S3:', error);
       throw error;

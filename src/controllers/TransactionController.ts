@@ -57,9 +57,9 @@ export class TransactionController {
   }
   async importTransactionToExcel(req: Request, res: Response) {
     const importTransaction = new ImportFileService();
-    const key = 'nome';
+    const key = 'nome'; // isso precisa alterar
     const result = await importTransaction.execute(key);
-
+    console.log(result);
     return res.json({
       result,
     });
@@ -68,7 +68,6 @@ export class TransactionController {
   async consult(req: Request, res: Response) {
     const queryTransaction = new QueryTransactionService();
     const result = await queryTransaction.execute();
-
     return res.json({
       result,
     });

@@ -15,21 +15,23 @@ export class FeedUserService {
     if (!user) {
       throw new BadRequestError(`Usuário não encontrado.`);
     }
-    if (!user.avatarFileId) {
-      throw new BadRequestError(`Usuário não encontrado.`);
-    }
+    // if (!user.avatarFileId) {
+    //   throw new BadRequestError(`Usuário não encontrado.`);
+    // }
 
-    const file = await this.fileRepository.findAvatarUrlById(user.avatarFileId);
-    if (!file) {
-      throw new BadRequestError(`File não encontrado.`);
+    let avatarUrl = null;
+
+    if (user.avatarFileId !== null) {
+      const file = await this.fileRepository.findAvatarUrlById(user.avatarFileId);
+
+      if (file) {
+        avatarUrl = file.publicUrl;
+      }
     }
-    const avatarUrl = file.publicUrl;
     return {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
+      id: user.id,
+      name: user.name,
+      email: user.email,
       avatarUrl,
     };
   }

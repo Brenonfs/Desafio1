@@ -6,7 +6,9 @@ import dotenv from 'dotenv';
 import ExcelJS from 'exceljs';
 import { Response } from 'express';
 
+import { BadRequestError } from '../../helpers/api-erros';
 import { TransactionRepository } from '../../repositories/transaction.repository';
+import { AwsCredentialsSchema } from '../../schemas/awsCredential';
 
 dotenv.config();
 export class ExportTransactionService {
@@ -60,15 +62,19 @@ export class ExportTransactionService {
       const excelBuffer = await workbook.xlsx.writeBuffer();
 
       // Configure AWS credentials (make sure to set them correctly in your .env file)
-      const accessKeyId = process.env.ACCESSKEYID;
-      const secretAccessKey = process.env.SECRETACCESSKEY;
-      const region = process.env.REGION;
+      const awsCredentialsResult = AwsCredentialsSchema.safeParse(process.env);
 
-      AWS.config.update({
-        accessKeyId,
-        secretAccessKey,
-        region,
-      });
+      if (awsCredentialsResult.success) {
+        const { ACCESSKEYID, SECRETACCESSKEY, REGION } = awsCredentialsResult.data;
+
+        AWS.config.update({
+          accessKeyId: ACCESSKEYID,
+          secretAccessKey: SECRETACCESSKEY,
+          region: REGION,
+        });
+      } else {
+        throw new BadRequestError(awsCredentialsResult.error.errors.join('; '));
+      }
       const s3 = new AWS.S3();
 
       const s3Params = {
@@ -80,16 +86,13 @@ export class ExportTransactionService {
       s3.upload(s3Params, (err: any, data: any) => {
         if (err) {
           console.error('Error uploading to S3:', err);
-          res.status(500).send('Ocorreu um erro ao exportar o arquivo para o S3.');
         } else {
-          console.log('Successfully uploaded to S3:', data);
-          res.status(200).send('Arquivo exportado com sucesso para o S3.');
+          return data;
         }
       });
     } catch (error) {
       // Handle other errors and respond with an error message
       console.error('Erro ao exportar arquivo para o S3:', error);
-      res.status(500).send('Ocorreu um erro ao exportar o arquivo para o S3.');
     }
   }
 }
