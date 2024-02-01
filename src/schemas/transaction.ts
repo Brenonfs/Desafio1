@@ -1,6 +1,13 @@
 import { z } from 'zod';
 const allowedMethods = ['debit_card', 'credit_card'];
 export const transactionCreateSchema = z.object({
+  name: z
+    .string({
+      required_error: 'O  campo "name" está vazio',
+      invalid_type_error: 'O  campo "name" tem caracteres inválidos',
+    })
+    .min(3, { message: 'O campo "name" está muito pequeno' }),
+
   value: z.number({
     required_error: 'O  campo "title" está vazio',
     invalid_type_error: 'O  campo "title" tem caracteres inválidos',
@@ -52,4 +59,12 @@ export const transactionCreateSchema = z.object({
       invalid_type_error: 'O  campo "CardVerificationCode" tem caracteres inválidos',
     })
     .min(3, { message: 'O campo "CardVerificationCode" está muito pequeno' }),
+});
+export const transactionExportSchema = z.object({
+  name: z
+    .string({
+      required_error: 'O  campo "name" está vazio',
+      invalid_type_error: 'O  campo "name" tem caracteres inválidos',
+    })
+    .min(3, { message: 'O campo "name" está muito pequeno' }),
 });

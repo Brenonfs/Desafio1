@@ -14,6 +14,7 @@ class CreateUserService {
     if (userExists) {
       throw new UnauthorizedError(`Este email ja está em uso.`);
     }
+
     const user = await this.userRepository.saveUser(name, email, password, avatarFileId);
     return {
       id: user.id,

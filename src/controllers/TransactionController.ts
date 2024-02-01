@@ -1,31 +1,44 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from 'express';
 
-import { BadRequestError } from '../helpers/api-erros';
-
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { transactionCreateSchema } from '../schemas/transaction';
+import { BadRequestError, UnauthorizedError } from '../helpers/api-erros';
+import { transactionCreateSchema, transactionExportSchema } from '../schemas/transaction';
 import { ImportFileService } from '../service/FileService/importFile.service';
 import { CreateTransactionService } from '../service/TransactionService/createTransaction.service';
 import { ExportTransactionService } from '../service/TransactionService/exportTransaction.service';
 import { ListTransactionService } from '../service/TransactionService/listTransaction.service';
 import { QueryTransactionService } from '../service/TransactionService/queryTransaction.service';
+import { UpdateTransactionService } from '../service/TransactionService/updateTrasaction.service';
 
 export class TransactionController {
   private listTransactionService: ListTransactionService;
   private queryTransactionService: QueryTransactionService;
+  private createTransactionService: CreateTransactionService;
+  private exportTransactionService: ExportTransactionService;
+  private importFileService: ImportFileService;
+  private updateTransactionService: UpdateTransactionService;
 
   constructor() {
     this.listTransactionService = new ListTransactionService();
     this.queryTransactionService = new QueryTransactionService();
+    this.createTransactionService = new CreateTransactionService();
+    this.exportTransactionService = new ExportTransactionService();
+    this.importFileService = new ImportFileService();
+    this.updateTransactionService = new UpdateTransactionService();
   }
 
-  async create(req: Request, res: Response) {
+  create = async (req: Request, res: Response) => {
+    const userId = (req as any).user?.id;
+    if (userId === undefined) {
+      throw new UnauthorizedError('Usuário não está autenticado.');
+    }
     const validatedtransactionSchema = transactionCreateSchema.safeParse(req.body);
     if (!validatedtransactionSchema.success) {
       throw new BadRequestError(`Não foi possível fazer a transição.`);
     }
-    const createTransaction = new CreateTransactionService();
-    const result = await createTransaction.execute(
+
+    const transaction = await this.createTransactionService.execute(
+      validatedtransactionSchema.data.name,
       validatedtransactionSchema.data.value,
       validatedtransactionSchema.data.description,
       validatedtransactionSchema.data.method,
@@ -33,43 +46,63 @@ export class TransactionController {
       validatedtransactionSchema.data.cardholderName,
       validatedtransactionSchema.data.cardExpirationDate,
       validatedtransactionSchema.data.cardVerificationCode,
+      userId as number,
+    );
+
+    return res.json({
+      transaction,
+    });
+  };
+
+  list = async (req: Request, res: Response) => {
+    const userId = (req as any).user?.id;
+    if (userId === undefined) {
+      throw new UnauthorizedError('Usuário não está autenticado.');
+    }
+
+    const result = await this.listTransactionService.execute(userId);
+    return res.json({
+      result,
+    });
+  };
+  exportTransaction = async (req: Request, res: Response) => {
+    const userId = (req as any).user?.id;
+    if (userId === undefined) {
+      throw new UnauthorizedError('Usuário não está autenticado.');
+    }
+    const validatedtransactionSchema = transactionExportSchema.safeParse(req.body);
+    if (!validatedtransactionSchema.success) {
+      throw new BadRequestError(`Não foi possível fazer a transição.`);
+    }
+
+    const key = await this.exportTransactionService.execute(userId, validatedtransactionSchema.data.name);
+    if (key === undefined) {
+      throw new BadRequestError('Falha com conexão com AWS S3.');
+    }
+
+    const excelUrl = await this.importFileService.execute(key);
+    if (excelUrl === undefined) {
+      throw new BadRequestError('A URL do avatar não foi obtida corretamente.');
+    }
+    const result = await this.updateTransactionService.execute(
+      userId,
+      validatedtransactionSchema.data.name,
+      key,
+      excelUrl,
     );
     return res.json({
       result,
     });
-  }
+  };
 
-  async list(req: Request, res: Response) {
-    const listTransaction = new ListTransactionService();
-    const result = await listTransaction.execute();
-
+  consult = async (req: Request, res: Response) => {
+    const userId = (req as any).user?.id;
+    if (userId === undefined) {
+      throw new UnauthorizedError('Usuário não está autenticado.');
+    }
+    const result = await this.queryTransactionService.execute(userId);
     return res.json({
       result,
     });
-  }
-  async exportTransactionToExcel(req: Request, res: Response) {
-    const exportTransaction = new ExportTransactionService();
-    const result = await exportTransaction.execute(res);
-
-    return res.json({
-      result,
-    });
-  }
-  async importTransactionToExcel(req: Request, res: Response) {
-    const importTransaction = new ImportFileService();
-    const key = 'nome'; // isso precisa alterar
-    const result = await importTransaction.execute(key);
-    console.log(result);
-    return res.json({
-      result,
-    });
-  }
-
-  async consult(req: Request, res: Response) {
-    const queryTransaction = new QueryTransactionService();
-    const result = await queryTransaction.execute();
-    return res.json({
-      result,
-    });
-  }
+  };
 }

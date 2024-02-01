@@ -6,10 +6,13 @@ import { exec } from 'node:child_process';
 import crypto from 'node:crypto';
 import util from 'node:util';
 import { Client } from 'pg';
+import { resolve } from 'path';
 
-dotenv.config({ path: '.env.testing' });
-
+// dotenv.config({ path: '.env.testing' });
+dotenv.config({ path: resolve(__dirname, '..', '.env.testing') });
 const execSync = util.promisify(exec);
+
+const prismaBinary = './node_modules/.bin/prisma';
 
 export default class PrismaTestEnvironment extends NodeEnvironment {
   private schema: string;
@@ -24,15 +27,16 @@ export default class PrismaTestEnvironment extends NodeEnvironment {
   }
 
   async setup() {
+    console.log('Setting up test environment');
     process.env.DATABASE_URL = this.connectionString;
     this.global.process.env.DATABASE_URL = this.connectionString;
 
     await execSync(`npx prisma migrate deploy`); // Alteração feita aqui
-
     return super.setup();
   }
 
   async teardown() {
+    console.log('Tearing down test environment');
     const client = new Client({
       connectionString: this.connectionString,
     });

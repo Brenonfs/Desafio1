@@ -52,6 +52,33 @@ class S3Storage {
       throw error;
     }
   }
+  async saveFileBuffer(buffer: Buffer, key: string): Promise<void> {
+    const BUCKET = process.env.BUCKET;
+    console.log('Saving file' + BUCKET);
+    if (!BUCKET) {
+      throw new Error('BUCKET environment variable is not defined.');
+    }
+
+    const contentType = mimeTypes.lookup(key);
+    if (!contentType) {
+      throw new Error('Content type not found for file: ' + key);
+    }
+
+    try {
+      await this.client
+        .putObject({
+          Bucket: BUCKET,
+          Key: key,
+          ACL: 'public-read',
+          Body: buffer,
+          ContentType: contentType,
+        })
+        .promise();
+    } catch (error) {
+      console.error('Error uploading file to S3:', error);
+      throw error;
+    }
+  }
 }
 
 export default S3Storage;

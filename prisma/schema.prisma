@@ -8,9 +8,10 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")// preciso alterar isso
 }
-model Transaction{
-  id                      Int       @id @default( autoincrement())
-  value                   Int
+model Transaction {
+  id                      Int       @id @default(autoincrement())
+  name                    String    @unique
+  value                   Float // isso era para ser float
   description             String
   method                  String
   cardNumber              String
@@ -18,21 +19,28 @@ model Transaction{
   cardExpirationDate      DateTime
   cardVerificationCode    String
   payables                String
-  valuePayables           Int
+  valuePayables           Float
   paymentDate             DateTime
+  userId                  Int
+  user                    User      @relation(fields: [userId], references: [id])
+  publicUrl               String?
+  key                     String?
 
   @@map("transactions")
 }
 
 model User {
-  id       Int       @id @default( autoincrement())
-  name      String
-  email     String    @unique
-  password  String
-  avatarFileId  Int?
-  avatarFile Files? @relation(fields: [avatarFileId], references: [id])
+  id           Int       @id @default(autoincrement())
+  name         String
+  email        String    @unique
+  password     String
+  avatarFileId Int?
+  avatarFile   Files?    @relation(fields: [avatarFileId], references: [id])
+  transactions Transaction[] // Adicionando campo de relação com Transaction
+
   @@map("users")
 }
+
 
 model Files {
   id          Int     @id @default(autoincrement())

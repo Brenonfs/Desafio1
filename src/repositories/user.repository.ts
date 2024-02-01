@@ -10,6 +10,7 @@ export class UserRepository {
     const user = await prisma.user.create({
       data: { name, email, password: hashedPassword, avatarFileId },
     });
+
     return user;
   }
   async findByUser(userId: number) {

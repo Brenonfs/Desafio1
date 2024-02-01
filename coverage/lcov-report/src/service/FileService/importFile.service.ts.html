@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">16.66% </span>
+                <span class="strong">22.64% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>9/54</span>
+                <span class='fraction'>12/53</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">16.66% </span>
+                <span class="strong">22.64% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>9/54</span>
+                <span class='fraction'>12/53</span>
             </div>
         
             
@@ -116,8 +116,7 @@
 <a name='L51'></a><a href='#L51'>51</a>
 <a name='L52'></a><a href='#L52'>52</a>
 <a name='L53'></a><a href='#L53'>53</a>
-<a name='L54'></a><a href='#L54'>54</a>
-<a name='L55'></a><a href='#L55'>55</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L54'></a><a href='#L54'>54</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -125,10 +124,9 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -171,32 +169,31 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import AWS from 'aws-sdk';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// Importando o esquema Zod
+&nbsp;
+import AWS from 'aws-sdk';
 import dotenv from 'dotenv';
 &nbsp;
 import { ApiError, BadRequestError, NotFoundError } from '../../helpers/api-erros';
+import { AwsCredentialsSchema } from '../../schemas/awsCredential';
 dotenv.config();
 &nbsp;
 export class ImportFileService {
-<span class="fstat-no" title="function not covered" >  async execute(key: string) {</span>
-<span class="cstat-no" title="statement not covered" >    // Obtém as credenciais AWS do ambiente</span>
-<span class="cstat-no" title="statement not covered" >    const accessKeyId = process.env.ACCESSKEYID;</span>
-<span class="cstat-no" title="statement not covered" >    const secretAccessKey = process.env.SECRETACCESSKEY;</span>
-<span class="cstat-no" title="statement not covered" >    const region = process.env.REGION;</span>
+  async <span class="fstat-no" title="function not covered" >execute(key: string) {</span>
+<span class="cstat-no" title="statement not covered" >    // Validando as credenciais AWS do ambiente usando o esquema Zod</span>
+<span class="cstat-no" title="statement not covered" >    const awsCredentialsResult = AwsCredentialsSchema.safeParse(process.env);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // Verifica se as credenciais AWS estão presentes</span>
-<span class="cstat-no" title="statement not covered" >    if (!accessKeyId || !secretAccessKey || !region) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new BadRequestError(</span>
-<span class="cstat-no" title="statement not covered" >        'Credenciais AWS ausentes. Certifique-se de que ACCESSKEYID, SECRETACCESSKEY e REGION estão configurados.',</span>
-<span class="cstat-no" title="statement not covered" >      );</span>
+<span class="cstat-no" title="statement not covered" >    if (awsCredentialsResult.success) {</span>
+<span class="cstat-no" title="statement not covered" >      const { ACCESSKEYID, SECRETACCESSKEY, REGION } = awsCredentialsResult.data;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >      AWS.config.update({</span>
+<span class="cstat-no" title="statement not covered" >        accessKeyId: ACCESSKEYID,</span>
+<span class="cstat-no" title="statement not covered" >        secretAccessKey: SECRETACCESSKEY,</span>
+<span class="cstat-no" title="statement not covered" >        region: REGION,</span>
+<span class="cstat-no" title="statement not covered" >      });</span>
+<span class="cstat-no" title="statement not covered" >    } else {</span>
+<span class="cstat-no" title="statement not covered" >      throw new BadRequestError(awsCredentialsResult.error.errors.join('; '));</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // Configura as credenciais AWS</span>
-<span class="cstat-no" title="statement not covered" >    AWS.config.update({</span>
-<span class="cstat-no" title="statement not covered" >      accessKeyId,</span>
-<span class="cstat-no" title="statement not covered" >      secretAccessKey,</span>
-<span class="cstat-no" title="statement not covered" >      region,</span>
-<span class="cstat-no" title="statement not covered" >    });</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    const sourceBucket = 'novament1-nfs';</span>
 <span class="cstat-no" title="statement not covered" >    const sourceKey = key;</span>
@@ -232,7 +229,7 @@ export class ImportFileService {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-01-21T20:05:38.703Z
+                at 2024-02-01T06:13:33.987Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

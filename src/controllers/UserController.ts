@@ -12,14 +12,31 @@ import { ListUserService } from '../service/UserService/listUser.service';
 import { UpdateUserService } from '../service/UserService/updateUser.serviceA';
 
 export class UserController {
-  async create(req: Request, res: Response) {
+  private createUserService: CreateUserService;
+  private updateUserService: UpdateUserService;
+  private uploadAvatarService: UploadFileService;
+  private importFileService: ImportFileService;
+  private createUserAvatarService: CreateUserAvatarService;
+  private feedUserService: FeedUserService;
+  private listUserService: ListUserService;
+
+  constructor() {
+    this.createUserService = new CreateUserService();
+    this.updateUserService = new UpdateUserService();
+    this.uploadAvatarService = new UploadFileService();
+    this.importFileService = new ImportFileService();
+    this.createUserAvatarService = new CreateUserAvatarService();
+    this.feedUserService = new FeedUserService();
+    this.listUserService = new ListUserService();
+  }
+
+  create = async (req: Request, res: Response) => {
     const validatedUserSchema = userCreateSchema.safeParse(req.body);
     if (!validatedUserSchema.success) {
       throw new BadRequestError(`Não foi possível criar usuário.`);
     }
 
-    const createUser = new CreateUserService();
-    const result = await createUser.execute(
+    const result = await this.createUserService.execute(
       validatedUserSchema.data.name,
       validatedUserSchema.data.email,
       validatedUserSchema.data.password,
@@ -28,21 +45,19 @@ export class UserController {
     return res.json({
       result,
     });
-  }
+  };
 
-  async update(req: Request, res: Response) {
-    const updateUserService = new UpdateUserService();
+  update = async (req: Request, res: Response) => {
     const validatedUserSchema = userUpdateSchema.safeParse(req.body);
     if (!validatedUserSchema.success) {
       throw new BadRequestError(`Não foi possível atualizar usuário.`);
     }
-
     const userId = (req as any).user?.id;
-
     if (userId === undefined) {
       throw new UnauthorizedError('Usuário não está autenticado.');
     }
-    const result = await updateUserService.execute(
+
+    const result = await this.updateUserService.execute(
       validatedUserSchema.data.name,
       validatedUserSchema.data.avatarFileId,
       userId as number,
@@ -51,58 +66,52 @@ export class UserController {
     return res.json({
       result,
     });
-  }
+  };
 
-  async createAvatar(req: Request, res: Response) {
+  createAvatar = async (req: Request, res: Response) => {
     const userId = (req as any).user?.id;
     if (userId === undefined) {
       throw new UnauthorizedError('Usuário não está autenticado.');
     }
-
-    const userAvatar = new CreateUserAvatarService();
-    const uploadAvatar = new UploadFileService();
-    const importFileService = new ImportFileService();
 
     const { file } = req;
     if (!file) {
       throw new BadRequestError('Erro: upload');
     }
-    const key = await uploadAvatar.execute(file, userId);
+    const key = await this.uploadAvatarService.execute(file, userId);
 
-    const avatarUrl = await importFileService.execute(key);
+    const avatarUrl = await this.importFileService.execute(key);
     if (avatarUrl === undefined) {
       throw new Error('A URL do avatar não foi obtida corretamente.');
     }
 
-    const result = await userAvatar.execute(key, avatarUrl, userId as number);
+    const result = await this.createUserAvatarService.execute(key, avatarUrl, userId as number);
 
     return res.json({
       result,
     });
-  }
+  };
 
-  async getFeed(req: Request, res: Response) {
+  getFeed = async (req: Request, res: Response) => {
     const userId = (req as any).user?.id;
     if (userId === undefined) {
       throw new UnauthorizedError('Usuário não está autenticado.');
     }
 
-    const feedUserService = new FeedUserService();
-    const user = await feedUserService.execute(userId);
+    const user = await this.feedUserService.execute(userId);
 
     return res.json({
       result: user,
     });
-  }
-  async listUsers(req: Request, res: Response) {
-    const listUser = new ListUserService();
+  };
+  listUsers = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 10;
 
-    const result = await listUser.execute(page, pageSize);
+    const result = await this.listUserService.execute(page, pageSize);
 
     return res.json({
       result,
     });
-  }
+  };
 }

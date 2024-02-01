@@ -57,25 +57,7 @@
   "tsx": "never"
   }
   ],
-  "import-helpers/order-imports": [
-  "warn",
-  {
-  "newlinesBetween": "always",
-  "groups": [
-  "module",
-  "/^@shared/",
-  [
-  "parent",
-  "sibling",
-  "index"
-  ]
-  ],
-  "alphabetize": {
-  "order": "asc",
-  "ignoreCase": true
-  }
-  }
-  ],
+  "import-helpers/order-imports": "off",
   "import/no-extraneous-dependencies": [
   "error",
   {

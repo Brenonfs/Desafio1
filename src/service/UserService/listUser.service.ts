@@ -2,7 +2,7 @@
 import { FileRepository } from '../../repositories/file.repository';
 import { UserRepository } from '../../repositories/user.repository';
 
-export interface User {
+export interface IUser {
   id: number;
   name: string;
   email: string;
@@ -24,7 +24,7 @@ export class ListUserService {
 
     const usersExists = await this.userRepository.listAll(startIndex, pageSize);
 
-    const usersWithAvatarUrl: User[] = await Promise.all(
+    const usersWithAvatarUrl: IUser[] = await Promise.all(
       usersExists.map(async (user) => {
         if (user.avatarFileId) {
           const file = await this.fileRepository.findAvatarUrlById(user.avatarFileId);

@@ -2,6 +2,7 @@
 import { prisma } from '../database';
 
 export interface TransactionData {
+  name: string;
   value: number;
   description: string;
   method: string;
@@ -12,6 +13,9 @@ export interface TransactionData {
   payables: string;
   valuePayables: number;
   paymentDate: Date;
+  userId: number;
+  publicUrl: null;
+  key: null;
 }
 
 export class TransactionRepository {
@@ -30,8 +34,9 @@ export class TransactionRepository {
     return transactions;
   }
 
-  async listAll() {
+  async listAll(userId: number) {
     const transactionsExists = await prisma.transaction.findMany({
+      where: { userId: Number(userId) },
       select: {
         value: true,
         description: true,
@@ -39,13 +44,30 @@ export class TransactionRepository {
         cardNumber: true,
         cardholderName: true,
         cardExpirationDate: true,
-        cardVerificationCode: true,
       },
     });
     return transactionsExists;
   }
-  async query() {
-    const transactionsExists = await prisma.transaction.findMany();
+  async findTransiction(userId: number, name: string) {
+    const transactionsExists = await prisma.transaction.findUnique({
+      where: { userId: Number(userId), name },
+    });
     return transactionsExists;
+  }
+  async query(userId: number) {
+    const transactionsExists = await prisma.transaction.findMany({
+      where: { userId: Number(userId) },
+    });
+    return transactionsExists;
+  }
+  async update(userId: number, name: string, key: string, excelUrl: string) {
+    const user = await prisma.transaction.update({
+      where: { userId: Number(userId), name },
+      data: {
+        key,
+        publicUrl: excelUrl,
+      },
+    });
+    return user;
   }
 }

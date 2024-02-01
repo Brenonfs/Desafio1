@@ -1,9 +1,6 @@
-/* eslint-disable prettier/prettier */
 import { BadRequestError, UnauthorizedError } from '../../helpers/api-erros';
 import { FileRepository } from '../../repositories/file.repository';
 import { UserRepository } from '../../repositories/user.repository';
-
-// ...
 
 class UpdateUserService {
   private userRepository: UserRepository;
@@ -14,52 +11,33 @@ class UpdateUserService {
     this.avatarRepository = new FileRepository();
   }
 
-  async execute(
-    name: string,
-    avatarFileId: number | null,
-    userId: number
-  ) {
-    const userRepository = new UserRepository();
-    const avatarRepository = new FileRepository();
-
-    const userExists = await userRepository.findByUser(userId);
-
+  async execute(name: string, avatarFileId: number | null, userId: number) {
+    const userExists = await this.userRepository.findByUser(userId);
     if (!userExists) {
       throw new UnauthorizedError(`Usuário não encontrado.`);
     }
-
     let avatarExists;
     if (avatarFileId !== null) {
-      avatarExists = await avatarRepository.findAvatarById(avatarFileId);
+      avatarExists = await this.avatarRepository.findAvatarById(avatarFileId);
     }
-
     if (!avatarExists) {
       throw new BadRequestError('Avatar não encontrado');
     }
-
     if (userId !== avatarExists.idPerson) {
       throw new UnauthorizedError('Esse avatar não pertence ao usuário.');
     }
-
     userExists.name = name !== undefined ? name : userExists.name;
-    userExists.avatarFileId = avatarFileId  !== undefined ? avatarFileId : userExists.avatarFileId;
+    userExists.avatarFileId = avatarFileId !== undefined ? avatarFileId : userExists.avatarFileId;
 
+    const user = await this.userRepository.updateUser(userExists.name, userExists.avatarFileId as number, userId);
 
-    const user = await this.userRepository.updateUser(
-      userExists.name,
-      userExists.avatarFileId as number,
-      userId
-    );
     return {
       id: user.id,
       name: user.name,
       email: user.email,
-      avatarFileId:user.avatarFileId,
+      avatarFileId: user.avatarFileId,
     };
   }
 }
-
-
-
 
 export { UpdateUserService };

@@ -6,7 +6,7 @@ import { jwtConfig } from '../../configs/auth';
 import { UnauthorizedError } from '../../helpers/api-erros';
 import { SessionRepository } from '../../repositories/session.repository';
 
-class CreateSessionService {
+export class CreateSessionService {
   private sessionRepository: SessionRepository;
 
   constructor() {
@@ -25,6 +25,7 @@ class CreateSessionService {
     }
     if (jwtConfig && jwtConfig.secret !== undefined) {
       const { secret, expiresIn } = jwtConfig;
+
       const token = sign({}, secret, {
         subject: String(userExist.id),
         expiresIn,
@@ -38,5 +39,3 @@ class CreateSessionService {
     }
   }
 }
-
-export { CreateSessionService };
